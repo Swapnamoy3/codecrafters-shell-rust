@@ -50,17 +50,18 @@ fn parse_command(command: String) -> COMMAND{
     match start {
         "exit" => return COMMAND::EXIT,
         "echo" => {
-            let rest = if command.len() > 4 {command[4..].to_string()} else {"".to_string()};
+            let rest = if command.len() > 4 {command[4..].trim().to_string()} else {"".to_string()};
             let words: Vec<String> = split_args(rest);
             COMMAND::ECHO(words)
         }
         "type" => {
-            let rest = if command.len() > 4 {command[4..].to_string()} else {"".to_string()};
+            let rest = if command.len() > 4 {command[4..].trim().to_string()} else {"".to_string()};
             return COMMAND::TYPE(rest);
         },
         "pwd" => return COMMAND::PWD,
         "cd" => {
-            let rest = if command.len() > 2 {command[2..].to_string()} else {"".to_string()};
+            let rest = if command.len() > 2 {command[2..].trim().to_string()} else {"".to_string()};
+            
             return COMMAND::CD(rest);
         }, 
         "cat" => {

@@ -39,6 +39,10 @@ fn parse_command(command: String) -> COMMAND{
             return COMMAND::TYPE(rest);
         },
         "pwd" => return COMMAND::PWD,
+        "cd" => {
+            let rest = if command.len() > 3 {command[3..].to_string()} else {"".to_string()};
+            return COMMAND::CD(rest);
+        }
         _ => {
 
             let words: Vec<&str> = command.split_whitespace().collect();
@@ -72,12 +76,13 @@ fn parse_command(command: String) -> COMMAND{
 
 fn process_command(command: COMMAND) -> RESULT{
     match command{
-        COMMAND::ECHO(rest) => RESULT::SUCCESS(format!("{}", rest)),
+        COMMAND::ECHO(rest) => RESULT::SUCCESS(Some(rest)),
         COMMAND::TYPE(rest) => cmd_type(rest),
-        COMMAND::EXIT => RESULT::SUCCESS("".to_string()),
+        COMMAND::EXIT => RESULT::SUCCESS(None),
         COMMAND::NONE(command) => RESULT::ERROR(format!("{}: command not found", command)),
         COMMAND::CUSTOM(program, args) => RESULT::RUN(program, args),
         COMMAND::PWD => cmd_pwd(),
+        COMMAND::CD(path) => cmd_cd(path)
     }
 }
 
@@ -109,7 +114,7 @@ fn main() {
         
 
         match res{
-            RESULT::SUCCESS(msg) => println!("{}", msg),
+            RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
             RESULT::ERROR(msg) => println!("{}", msg),
             _ => {}
         }

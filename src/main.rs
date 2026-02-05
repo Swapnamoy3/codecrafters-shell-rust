@@ -25,7 +25,7 @@ fn input_command() -> String{
 
 fn split_args(command: String) -> Vec<String>{  
 
-    if(command.len() == 0){return vec![]}
+    if command.len() == 0 {return vec![]}
 
     let args = shlex::split(&command);
 
@@ -155,15 +155,3 @@ fn main() {
 }
 
 
-mod test{
-    use super::*;
-
-    #[test]
-    fn test_split_args(){
-        let test_string = "hel'lo''wo r'l d".to_string();
-        let args = split_args(test_string);
-        println!("{:?}", args);
-        assert!(true);
-
-    }
-}

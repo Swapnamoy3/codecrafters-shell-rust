@@ -1,6 +1,6 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::process::Command;
+use std::{fmt::format, process::Command};
 
 
 fn input_command() -> String{
@@ -12,29 +12,58 @@ fn input_command() -> String{
 }
 
 
-fn print_error(command: String, message: String) {
-    println!("{}: {}", command, message);
 
+
+
+static COMMANDS: [&str; 4] = ["exit", "echo", "exit", "type"];
+
+enum RESULT{
+    ERROR(String),
+    SUCCESS(String)
 }
-
-
-enum COMMANDS{
+enum COMMAND{
     EXIT, 
     ECHO(String),
-    ERROR(String, String),
+    TYPE(String),
+    NONE(String)
 }
-fn parse_command(command: String) -> COMMANDS{
+
+fn find_command(command: String) -> RESULT{
+    for cmd in COMMANDS{
+        if(cmd == command){
+            return RESULT::SUCCESS(format!("{} is a builtin command", command));
+        }
+    }
+
+    return RESULT::ERROR(format!("{}: is not found", command));
+}
+
+
+fn parse_command(command: String) -> COMMAND{
     if(command.starts_with("exit")){
-        return COMMANDS::EXIT;
+        return COMMAND::EXIT;
     }
     else if (command.starts_with("echo")) {
         let rest = command[5..].to_string(); 
-        return COMMANDS::ECHO(rest);
+        return COMMAND::ECHO(rest);
+    }else if(command.starts_with("type")){
+        let rest = command[5..].to_string();
+        return COMMAND::TYPE(rest);
     }
 
 
-    return COMMANDS::ERROR(command, "command not found".to_string());
     
+    return COMMAND::NONE(command);
+}
+
+
+fn process_command(command: COMMAND) -> RESULT{
+    match command{
+        COMMAND::ECHO(rest) => RESULT::SUCCESS(format!("{}", rest)),
+        COMMAND::TYPE(rest) => find_command(rest),
+        COMMAND::EXIT => RESULT::SUCCESS("".to_string()),
+        COMMAND::NONE(command) => RESULT::ERROR(format!("{}: command not found", command)),
+    }
 }
 
 fn main() {
@@ -46,11 +75,13 @@ fn main() {
 
         let command = input_command();
 
-        match parse_command(command.clone()){
-            COMMANDS::EXIT => break,
-            COMMANDS::ECHO(rest) => println!("{}", rest),
-            COMMANDS::ERROR(command, message) => print_error(command, message),
-        };
+        let command = parse_command(command);
+        let res = process_command(command);
+
+        match res{
+            RESULT::SUCCESS(msg) => println!("{}", msg),
+            RESULT::ERROR(msg) => println!("{}", msg),
+        }
 
 
     }

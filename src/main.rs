@@ -35,7 +35,7 @@ fn find_command(command: String) -> RESULT{
         }
     }
 
-    return RESULT::ERROR(format!("{}: is not found", command));
+    return RESULT::ERROR(format!("{}: not found", command));
 }
 
 

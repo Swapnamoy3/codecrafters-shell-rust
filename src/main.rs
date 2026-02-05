@@ -31,7 +31,7 @@ enum COMMAND{
 fn find_command(command: String) -> RESULT{
     for cmd in COMMANDS{
         if(cmd == command){
-            return RESULT::SUCCESS(format!("{} is a builtin command", command));
+            return RESULT::SUCCESS(format!("{} is a shell builtin", command));
         }
     }
 

@@ -65,14 +65,14 @@ fn parse_command(command: String) -> COMMAND{
             return COMMAND::CD(rest);
         }, 
         "cat" => {
-            let rest = if command.len() > 3 {command[3..].to_string()} else {"".to_string()};
+            let rest = if command.len() > 3 {command[3..].trim().to_string()} else {"".to_string()};
             let words: Vec<String> = split_args(rest);
             return COMMAND::CAT(words);
         }
 
         _ => {
 
-            let words: Vec<&str> = command.split_whitespace().collect();
+            let words: Vec<String> = split_args(command.clone());
             if words.len() == 0 {return COMMAND::NONE(command);};
         
             let res = process_command(COMMAND::TYPE(words[0].to_string()));

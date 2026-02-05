@@ -19,7 +19,7 @@ pub fn cmd_echo(args: Vec<String>)-> RESULT{
 
 pub fn cmd_cat(path: Vec<String>)-> RESULT{
 
-    let mut content = path.iter().map(|pth|{
+    let content = path.iter().map(|pth|{
         fs::read_to_string(pth).unwrap()
     }).collect::<Vec<String>>().join("\n");
 

@@ -11,6 +11,7 @@ use std::env;
 
 
 pub fn cmd_echo(args: Vec<String>)-> RESULT{
+    // println!("{:?}", args);
     let msg = args.join(" ");
     return RESULT::SUCCESS(Some(msg));
 }

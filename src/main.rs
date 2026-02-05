@@ -25,9 +25,10 @@ fn input_command() -> String{
 
 fn split_args(command: String) -> Vec<String>{  
     let tokens = command.split("'").collect::<Vec<&str>>();
+    // println!("{:?}", tokens);
     let mut args = Vec::new();
 
-    let rem = if command.chars().nth(0).unwrap() == '\'' {0} else {1};
+    let rem = 1;
     for i in 0..tokens.len(){
         if i%2 == rem {
             let arg = tokens[i].to_string();

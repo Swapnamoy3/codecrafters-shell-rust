@@ -1,16 +1,25 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
-use std::{fmt::format, process::Command};
+use std::fs;
+use std::env;
+use std::path::PathBuf;
 
 
-fn input_command() -> String{
-    let mut buffer = String::new();
-    io::stdin().read_line(&mut buffer).unwrap();
-    let buffer = buffer.trim();
 
-    buffer.to_string()
+#[cfg(unix)] // This ensures the following code only compiles on Unix-like systems
+use std::os::unix::fs::PermissionsExt;
+
+fn is_executable(file: &fs::Metadata) -> bool {
+    #[cfg(unix)]
+    {
+        file.permissions().mode() & 0o111 != 0
+    }
+
+    #[cfg(not(unix))]
+    {
+        true
+    }
 }
-
 
 
 
@@ -30,6 +39,19 @@ enum COMMAND{
     TYPE(String),
     NONE(String)
 }
+fn input_command() -> String{
+    let mut buffer = String::new();
+    io::stdin().read_line(&mut buffer).unwrap();
+    let buffer = buffer.trim();
+
+    buffer.to_string()
+}
+
+fn get_path() -> Vec<PathBuf>{
+    let paths = env::split_paths(&env::var_os("PATH").unwrap_or_default()).collect::<Vec<PathBuf>>();
+
+    paths
+}
 
 fn find_command(command: String) -> RESULT{
     for cmd in COMMANDS{
@@ -37,6 +59,19 @@ fn find_command(command: String) -> RESULT{
             return RESULT::SUCCESS(format!("{} is a shell builtin", command));
         }
     }
+
+
+    let paths = get_path();
+    for path in paths{
+        let desired_file_path = path.join(&command);
+        if(fs::exists(&desired_file_path).unwrap()){
+            if(is_executable(&fs::metadata(&desired_file_path).unwrap())){
+                return RESULT::SUCCESS(format!("{} is {}", command, desired_file_path.display()));
+            }
+        }
+    }
+
+
 
     return RESULT::ERROR(format!("{}: not found", command));
 }
@@ -47,10 +82,10 @@ fn parse_command(command: String) -> COMMAND{
         return COMMAND::EXIT;
     }
     else if (command.starts_with("echo")) {
-        let rest = command[5..].to_string(); 
+        let rest = if command.len() > 4 {command[5..].to_string()} else {"".to_string()};
         return COMMAND::ECHO(rest);
     }else if(command.starts_with("type")){
-        let rest = command[5..].to_string();
+        let rest = if command.len() > 4 {command[5..].to_string()} else {"".to_string()};
         return COMMAND::TYPE(rest);
     }
 
@@ -93,4 +128,7 @@ fn main() {
 
 
     }
+
+
+    // get_path();
 }

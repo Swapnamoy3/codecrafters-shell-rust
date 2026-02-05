@@ -23,7 +23,7 @@ pub fn cmd_cat(path: Vec<String>)-> RESULT{
         fs::read_to_string(pth).unwrap()
     }).collect::<Vec<String>>().join("\n");
 
-    return RESULT::SUCCESS(Some(format!("{}", content.len())));
+    return RESULT::SUCCESS(Some(content));
 }
 
 // impl of type

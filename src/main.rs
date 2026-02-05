@@ -62,7 +62,7 @@ fn parse_command(command: String) -> COMMAND{
 
     let res = process_command(COMMAND::TYPE(words[0].to_string()));
 
-    let words: Vec<String> = words.iter().map(|s| s.to_string()).collect();
+    let words: Vec<String> = words.iter().skip(1).map(|s| s.to_string()).collect();
     
     
     

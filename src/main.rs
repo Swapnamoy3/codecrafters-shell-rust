@@ -53,7 +53,13 @@ fn parse_command(command: String) -> COMMAND{
         "cd" => {
             let rest = if command.len() > 3 {command[3..].to_string()} else {"".to_string()};
             return COMMAND::CD(rest);
+        }, 
+        "cat" => {
+            let rest = if command.len() > 4 {command[5..].to_string()} else {"".to_string()};
+            let words: Vec<String> = split_args(rest);
+            return COMMAND::CAT(words);
         }
+
         _ => {
 
             let words: Vec<&str> = command.split_whitespace().collect();
@@ -93,7 +99,8 @@ fn process_command(command: COMMAND) -> RESULT{
         COMMAND::NONE(command) => RESULT::ERROR(format!("{}: command not found", command)),
         COMMAND::CUSTOM(program, args) => RESULT::RUN(program, args),
         COMMAND::PWD => cmd_pwd(),
-        COMMAND::CD(path) => cmd_cd(path)
+        COMMAND::CD(path) => cmd_cd(path),
+        COMMAND::CAT(paths) => cmd_cat(paths)
     }
 }
 

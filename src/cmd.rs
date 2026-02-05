@@ -4,6 +4,7 @@ use crate::os_helpers::*;
 use crate::tokens::*;
 
 use std::fs;
+use std::path;
 use std::path::Path;
 use std::process::Command;
 use std::env;
@@ -14,6 +15,16 @@ pub fn cmd_echo(args: Vec<String>)-> RESULT{
     // println!("{:?}", args);
     let msg = args.join(" ");
     return RESULT::SUCCESS(Some(msg));
+}
+
+pub fn cmd_cat(path: Vec<String>)-> RESULT{
+
+    let mut content = path.iter().map(|pth|{
+        fs::read_to_string(pth).unwrap()
+    }).collect::<Vec<String>>().join("\n");
+
+
+    return RESULT::SUCCESS(Some(content));
 }
 
 // impl of type

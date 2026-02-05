@@ -15,5 +15,6 @@ pub enum COMMAND{
     PWD,
     CD(String),
     CUSTOM(String, Vec<String>),
-    NONE(String)
+    NONE(String), 
+    CAT(Vec<String>)
 }

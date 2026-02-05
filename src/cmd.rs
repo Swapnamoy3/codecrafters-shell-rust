@@ -62,7 +62,15 @@ pub fn cmd_custom_command(program: String, args: Vec<String>)-> RESULT{
     }
 }
 
-pub fn cmd_cd(path: String) -> RESULT{
+pub fn cmd_cd(mut path: String) -> RESULT{
+
+    
+    let home = env::var("HOME").unwrap();
+
+    if path == "~"{
+        path = home;
+    }
+
     if fs::exists(Path::new(&path)).unwrap() {
         env::set_current_dir(&path).unwrap();
         return RESULT::SUCCESS(None);

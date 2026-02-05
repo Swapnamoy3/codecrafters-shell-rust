@@ -15,7 +15,7 @@ pub fn is_executable(file: &fs::Metadata) -> bool {
 
     #[cfg(not(unix))]
     {
-        true
+        file.is_file()
     }
 }
 

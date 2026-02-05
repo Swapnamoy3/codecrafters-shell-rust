@@ -1,4 +1,4 @@
-pub static COMMANDS: [&str; 4] = ["exit", "echo", "exit", "type"];
+pub static COMMANDS: [&str; 5] = ["exit", "echo", "exit", "type", "pwd"];
 
 #[derive(PartialEq)]
 pub enum RESULT{
@@ -12,6 +12,7 @@ pub enum COMMAND{
     EXIT, 
     ECHO(String),
     TYPE(String),
+    PWD,
     CUSTOM(String, Vec<String>),
     NONE(String)
 }

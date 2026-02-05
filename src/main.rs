@@ -8,7 +8,7 @@ use crate::tokens::*;
 use std::io::{self, Write};
 use std::fs;
 use std::process::Command;
-
+use std::env;
 
 
 fn input_command() -> String{
@@ -22,7 +22,7 @@ fn input_command() -> String{
 
 fn find_command(command: String) -> RESULT{
     for cmd in COMMANDS{
-        if(cmd == command){
+        if cmd == command {
             return RESULT::SUCCESS(format!("{} is a shell builtin", command));
         }
     }
@@ -31,8 +31,9 @@ fn find_command(command: String) -> RESULT{
     let paths = get_path();
     for path in paths{
         let desired_file_path = path.join(&command);
-        if(fs::exists(&desired_file_path).unwrap()){
-            if(is_executable(&fs::metadata(&desired_file_path).unwrap())){
+        if fs::exists(&desired_file_path).unwrap() {
+
+            if is_executable(&fs::metadata(&desired_file_path).unwrap()) {
                 return RESULT::SUCCESS(format!("{} is {}", command, desired_file_path.display()));
             }
         }
@@ -45,19 +46,19 @@ fn find_command(command: String) -> RESULT{
 
 
 fn parse_command(command: String) -> COMMAND{
-    if(command.starts_with("exit")){
+    if command.starts_with("exit") {
         return COMMAND::EXIT;
     }
-    else if (command.starts_with("echo")) {
+    else if command.starts_with("echo") {
         let rest = if command.len() > 4 {command[5..].to_string()} else {"".to_string()};
         return COMMAND::ECHO(rest);
-    }else if(command.starts_with("type")){
+    }else if command.starts_with("type"){
         let rest = if command.len() > 4 {command[5..].to_string()} else {"".to_string()};
         return COMMAND::TYPE(rest);
-    }
+    } else if command.starts_with("pwd") {return COMMAND::PWD;}
 
     let words: Vec<&str> = command.split_whitespace().collect();
-    if(words.len() == 0) {return COMMAND::NONE(command);};
+    if words.len() == 0 {return COMMAND::NONE(command);};
 
 
     let res = process_command(COMMAND::TYPE(words[0].to_string()));
@@ -83,6 +84,11 @@ fn parse_command(command: String) -> COMMAND{
 }
 
 
+fn pwd() -> RESULT{
+    let path = env::current_dir().unwrap();
+    return RESULT::SUCCESS(format!("{}", path.display()));
+}
+
 fn process_command(command: COMMAND) -> RESULT{
     match command{
         COMMAND::ECHO(rest) => RESULT::SUCCESS(format!("{}", rest)),
@@ -90,10 +96,11 @@ fn process_command(command: COMMAND) -> RESULT{
         COMMAND::EXIT => RESULT::SUCCESS("".to_string()),
         COMMAND::NONE(command) => RESULT::ERROR(format!("{}: command not found", command)),
         COMMAND::CUSTOM(program, args) => RESULT::RUN(program, args),
+        COMMAND::PWD => pwd(),
     }
 }
 
-fn run(program: String, args: Vec<String>)-> RESULT{
+fn run_custom_command(program: String, args: Vec<String>)-> RESULT{
     let output = Command::new(program)
         .args(args)
         .output()
@@ -123,7 +130,7 @@ fn main() {
 
         let command = parse_command(command);
 
-        if(command == COMMAND::EXIT){
+        if command == COMMAND::EXIT {
             break;
         }
         
@@ -131,7 +138,7 @@ fn main() {
 
         
         let res = match res{
-            RESULT::RUN(program, args) => run(program, args),
+            RESULT::RUN(program, args) => run_custom_command(program, args),
             _ => {res}
         };
 

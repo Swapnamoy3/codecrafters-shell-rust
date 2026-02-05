@@ -8,7 +8,7 @@ mod cmd;
 use crate::cmd::*;
 
 use std::io::{self, Write};
-
+use shlex;
 
 
 
@@ -24,24 +24,7 @@ fn input_command() -> String{
 
 
 fn split_args(command: String) -> Vec<String>{  
-    let tokens = command.split("'").collect::<Vec<&str>>();
-    // println!("{:?}", tokens);
-    let mut args = Vec::new();
-
-    let rem = 1;
-    for i in 0..tokens.len(){
-        if i%2 == rem {
-            let arg = tokens[i].to_string();
-            args.push(arg);
-        }else{
-            for word in tokens[i].split_whitespace(){
-                args.push(word.to_string());
-            }
-        }
-
-
-
-    }
+    let args = shlex::split(&command).unwrap();
 
     args
 }

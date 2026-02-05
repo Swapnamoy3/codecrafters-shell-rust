@@ -10,7 +10,7 @@ pub enum RESULT{
 #[derive(PartialEq)]
 pub enum COMMAND{
     EXIT, 
-    ECHO(String),
+    ECHO(Vec<String>),
     TYPE(String),
     PWD,
     CD(String),

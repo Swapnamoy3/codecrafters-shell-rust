@@ -10,6 +10,11 @@ use std::env;
 
 
 
+pub fn cmd_echo(args: Vec<String>)-> RESULT{
+    let msg = args.join(" ");
+    return RESULT::SUCCESS(Some(msg));
+}
+
 // impl of type
 pub fn cmd_type(command: String) -> RESULT{  
     for cmd in COMMANDS{

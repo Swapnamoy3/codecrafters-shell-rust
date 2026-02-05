@@ -21,18 +21,45 @@ fn input_command() -> String{
 }
 
 
+
+
+fn split_args(command: String) -> Vec<String>{  
+    let tokens = command.split("'").collect::<Vec<&str>>();
+    let mut args = Vec::new();
+
+    let rem = if command.chars().nth(0).unwrap() == '\'' {0} else {1};
+    for i in 0..tokens.len(){
+        if i%2 == rem {
+            let arg = tokens[i].to_string();
+            args.push(arg);
+        }else{
+            for word in tokens[i].split_whitespace(){
+                args.push(word.to_string());
+            }
+        }
+
+
+
+    }
+
+    args
+}
 fn parse_command(command: String) -> COMMAND{
 
     let start = command.split_whitespace().collect::<Vec<&str>>()[0];
 
-    if start.len() == 0 {return COMMAND::NONE(command);};
+
+
+
+
 
 
     match start {
         "exit" => return COMMAND::EXIT,
         "echo" => {
-            let rest = if command.len() > 4 {command[5..].to_string()} else {"".to_string()};
-            return COMMAND::ECHO(rest);
+            let rest = if command.len() > 5 {command[5..].to_string()} else {"".to_string()};
+            let words: Vec<String> = split_args(rest);
+            COMMAND::ECHO(words)
         }
         "type" => {
             let rest = if command.len() > 4 {command[5..].to_string()} else {"".to_string()};
@@ -76,7 +103,7 @@ fn parse_command(command: String) -> COMMAND{
 
 fn process_command(command: COMMAND) -> RESULT{
     match command{
-        COMMAND::ECHO(rest) => RESULT::SUCCESS(Some(rest)),
+        COMMAND::ECHO(rest) => cmd_echo(rest),
         COMMAND::TYPE(rest) => cmd_type(rest),
         COMMAND::EXIT => RESULT::SUCCESS(None),
         COMMAND::NONE(command) => RESULT::ERROR(format!("{}: command not found", command)),
@@ -124,4 +151,18 @@ fn main() {
 
 
     // get_path();
+}
+
+
+mod test{
+    use super::*;
+
+    #[test]
+    fn test_split_args(){
+        let test_string = "hel'lo''wo r'l d".to_string();
+        let args = split_args(test_string);
+        println!("{:?}", args);
+        assert!(true);
+
+    }
 }

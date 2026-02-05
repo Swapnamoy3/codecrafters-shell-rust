@@ -1,44 +1,16 @@
 #[allow(unused_imports)]
+mod os_helpers;
+use crate::os_helpers::*;
+
+mod tokens;
+use crate::tokens::*;
+
 use std::io::{self, Write};
 use std::fs;
-use std::env;
-use std::path::PathBuf;
+use std::process::Command;
 
 
 
-#[cfg(unix)] // This ensures the following code only compiles on Unix-like systems
-use std::os::unix::fs::PermissionsExt;
-
-fn is_executable(file: &fs::Metadata) -> bool {
-    #[cfg(unix)]
-    {
-        file.permissions().mode() & 0o111 != 0
-    }
-
-    #[cfg(not(unix))]
-    {
-        true
-    }
-}
-
-
-
-
-static COMMANDS: [&str; 4] = ["exit", "echo", "exit", "type"];
-
-#[derive(PartialEq)]
-enum RESULT{
-    ERROR(String),
-    SUCCESS(String)
-}
-
-#[derive(PartialEq)]
-enum COMMAND{
-    EXIT, 
-    ECHO(String),
-    TYPE(String),
-    NONE(String)
-}
 fn input_command() -> String{
     let mut buffer = String::new();
     io::stdin().read_line(&mut buffer).unwrap();
@@ -47,11 +19,6 @@ fn input_command() -> String{
     buffer.to_string()
 }
 
-fn get_path() -> Vec<PathBuf>{
-    let paths = env::split_paths(&env::var_os("PATH").unwrap_or_default()).collect::<Vec<PathBuf>>();
-
-    paths
-}
 
 fn find_command(command: String) -> RESULT{
     for cmd in COMMANDS{
@@ -89,9 +56,29 @@ fn parse_command(command: String) -> COMMAND{
         return COMMAND::TYPE(rest);
     }
 
+    let words: Vec<&str> = command.split_whitespace().collect();
+    if(words.len() == 0) {return COMMAND::NONE(command);};
+
+
+    let res = process_command(COMMAND::TYPE(words[0].to_string()));
+
+    let words: Vec<String> = words.iter().map(|s| s.to_string()).collect();
+    
+    
+    
+    let res = match res {
+        RESULT::SUCCESS(_mag) =>{
+            COMMAND::CUSTOM(words[0].clone(), words)
+        },
+        _ => {
+            COMMAND::NONE(command)
+        }
+    };
+
+
 
     
-    return COMMAND::NONE(command);
+    return res;
 }
 
 
@@ -101,6 +88,20 @@ fn process_command(command: COMMAND) -> RESULT{
         COMMAND::TYPE(rest) => find_command(rest),
         COMMAND::EXIT => RESULT::SUCCESS("".to_string()),
         COMMAND::NONE(command) => RESULT::ERROR(format!("{}: command not found", command)),
+        COMMAND::CUSTOM(program, args) => RESULT::RUN(program, args),
+    }
+}
+
+fn run(program: String, args: Vec<String>)-> RESULT{
+    let output = Command::new(program)
+        .args(args)
+        .output()
+        .expect("failed to execute process");
+
+
+    match output.status.code(){
+        Some(code) => RESULT::SUCCESS(format!("{}", String::from_utf8_lossy(&output.stdout))),
+        None => RESULT::SUCCESS(format!("{}", String::from_utf8_lossy(&output.stdout))),
     }
 }
 
@@ -121,9 +122,19 @@ fn main() {
         
         let res = process_command(command);
 
+        
+        let res = match res{
+            RESULT::RUN(program, args) => run(program, args),
+            _ => {res}
+        };
+
+
+        
+
         match res{
             RESULT::SUCCESS(msg) => println!("{}", msg),
             RESULT::ERROR(msg) => println!("{}", msg),
+            _ => {}
         }
 
 

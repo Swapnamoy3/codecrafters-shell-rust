@@ -24,6 +24,8 @@ fn input_command() -> String{
 
 
 fn split_args(command: String) -> Vec<String>{  
+
+    if(command.len() == 0){return vec![]}
     let args = shlex::split(&command).unwrap();
 
     args

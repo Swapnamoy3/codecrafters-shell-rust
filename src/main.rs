@@ -17,10 +17,13 @@ fn input_command() -> String{
 
 static COMMANDS: [&str; 4] = ["exit", "echo", "exit", "type"];
 
+#[derive(PartialEq)]
 enum RESULT{
     ERROR(String),
     SUCCESS(String)
 }
+
+#[derive(PartialEq)]
 enum COMMAND{
     EXIT, 
     ECHO(String),
@@ -76,6 +79,11 @@ fn main() {
         let command = input_command();
 
         let command = parse_command(command);
+
+        if(command == COMMAND::EXIT){
+            break;
+        }
+        
         let res = process_command(command);
 
         match res{

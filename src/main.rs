@@ -30,7 +30,10 @@ fn split_args(command: String) -> Vec<String>{
     let args = shlex::split(&command);
 
     match args{
-        None => return vec![],
+        None => {
+            println!("{}", command);
+            return vec![]
+        },
         Some(args)  => args
     }
 

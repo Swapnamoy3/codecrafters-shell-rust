@@ -19,9 +19,14 @@ fn print_error(command: String, message: String) {
 
 fn main() {
     // TODO: Uncomment the code below to pass the first stage
-    print!("$ ");
-    io::stdout().flush().unwrap();
-    
-    let command = input_command();
-    print_error(command, "command not found".to_string());
+
+    loop{
+        print!("$ ");
+        io::stdout().flush().unwrap();
+
+        let command = input_command();
+        
+        print_error(command, "command not found".to_string());
+
+    }
 }

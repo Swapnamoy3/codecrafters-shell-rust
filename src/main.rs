@@ -62,13 +62,14 @@ fn parse_command(command: String) -> COMMAND{
 
     let res = process_command(COMMAND::TYPE(words[0].to_string()));
 
-    let words: Vec<String> = words.iter().skip(1).map(|s| s.to_string()).collect();
+    let program = words[0].to_string();
+    let args: Vec<String> = words.iter().skip(1).map(|s| s.to_string()).collect();
     
-    
+
     
     let res = match res {
         RESULT::SUCCESS(_mag) =>{
-            COMMAND::CUSTOM(words[0].clone(), words)
+            COMMAND::CUSTOM(program, args)
         },
         _ => {
             COMMAND::NONE(command)
@@ -100,8 +101,14 @@ fn run(program: String, args: Vec<String>)-> RESULT{
 
 
     match output.status.code(){
-        Some(code) => RESULT::SUCCESS(format!("{}", String::from_utf8_lossy(&output.stdout))),
-        None => RESULT::SUCCESS(format!("{}", String::from_utf8_lossy(&output.stdout))),
+        Some(code) => 
+            if code == 0 {
+                RESULT::SUCCESS(format!("{}", String::from_utf8_lossy(&output.stdout).trim()))
+            }else{
+                RESULT::ERROR(format!("{}", String::from_utf8_lossy(&output.stderr).trim()))
+            }
+        ,
+        None => RESULT::ERROR("failed to execute process".to_string()),
     }
 }
 

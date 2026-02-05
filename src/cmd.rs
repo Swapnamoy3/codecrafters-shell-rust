@@ -21,7 +21,7 @@ pub fn cmd_cat(path: Vec<String>)-> RESULT{
 
     let content = path.iter().map(|pth|{
         fs::read_to_string(pth).unwrap()
-    }).collect::<Vec<String>>().join("\n");
+    }).collect::<Vec<String>>().join(" ");
 
     return RESULT::SUCCESS(Some(content));
 }

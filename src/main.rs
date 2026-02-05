@@ -25,6 +25,10 @@ fn main() {
         io::stdout().flush().unwrap();
 
         let command = input_command();
+
+        if command == "exit" {
+            break;
+        }
         
         print_error(command, "command not found".to_string());
 

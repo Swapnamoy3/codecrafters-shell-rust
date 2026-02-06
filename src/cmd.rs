@@ -104,7 +104,7 @@ pub fn cmd_pwd() -> RESULT{
 pub fn cmd_custom_command(program: String, args: Vec<String>)-> RESULT{
 
     let output = Command::new(program)
-        .arg(args.join(" "))
+        .args(args)
         .output()
         .expect("failed to execute process");
 

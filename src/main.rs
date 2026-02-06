@@ -8,7 +8,6 @@ mod cmd;
 use crate::cmd::*;
 
 use std::io::{self, Write};
-use std::result;
 use shlex;
 
 
@@ -159,13 +158,15 @@ fn main() {
 
 
 mod test {
+    use std::process::Command;
     use super::*;
     #[test]
     fn test() {
 
-        let args = split_args("ls 1> file.txt".to_string());
-        println!("{:?}", args);
-
-        assert_eq!(1, 1);
+        let op = Command::new("ls")
+        .arg("-1 > test.txt")
+        .output().expect("failed to execute process");
+        println!("{}", String::from_utf8_lossy(&op.stderr));
+        assert_eq!(1, 2);
     }
 }

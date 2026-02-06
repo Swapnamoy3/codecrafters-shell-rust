@@ -35,30 +35,34 @@ fn split_args(command: String) -> Vec<String>{
     args.unwrap()
 
 }
+fn split_redirection(args: Vec<String>) -> (Vec<String>, String){
 
-fn parse_command(command: String) -> Vec<COMMAND>{
+    let splitted = args.split(|s| {
+        s == ">" || s == "1>"
+    }).collect::<Vec<&[String]>>();
+
+    if splitted.len() == 1 {return (args, "".to_string())};
+
+
+    (splitted[0].to_vec(), splitted[1][0].to_string())
+}
+
+fn parse_command(command: String) -> Vec<(COMMAND, String)>{
     let trimmed_command = command.trim();
     let args = shlex::split(&trimmed_command).unwrap();
     
 
-    let mut commands = vec![];
-    let mut arg_vec = vec![];
-    for arg in args {
-        if arg == "|" {
-            commands.push(arg_vec);
-            arg_vec = vec![];
-        }else{
-            arg_vec.push(arg);
-        }
-    }
-    commands.push(arg_vec);
+    let  commands = args.split(|s| {s == "|"});
+    
 
-    commands.iter().map(|cmd| {
-        identify_command(cmd.to_vec())
-    }).collect::<Vec<COMMAND>>()
+    commands.map(|cmd| {
 
-
+        let (cmd, redirection) = split_redirection(cmd.to_vec());
+        (identify_command(cmd.to_vec()), redirection)
+    }).collect::<Vec<(COMMAND, String)>>()
 }
+
+
 
 fn identify_command(args: Vec<String>) -> COMMAND{
     if args.len() == 0 {return COMMAND::NONE("".to_string())}
@@ -97,10 +101,17 @@ fn execute_command(command: COMMAND) -> Vec<RESULT>{
 
 
 
-fn output(results: Vec<RESULT>){
+fn output(results: Vec<RESULT>, redirection: String){
     for r in results{
         match r{
-            RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
+            RESULT::SUCCESS(Some(msg)) => {
+                if redirection.len() == 0{
+                    println!("{}", msg);
+                }else{
+                    let mut file = std::fs::File::create(&redirection).unwrap();
+                    file.write_all(msg.as_bytes()).unwrap();
+                }
+            },
             RESULT::ERROR(msg) => println!("{}", msg),
             _ => {}
         }
@@ -119,10 +130,10 @@ fn main() {
 
         let commands = parse_command(command);
 
-        for cmd in commands{
+        for (cmd, redirection) in commands{
             if cmd == COMMAND::EXIT {return;}
             let executed_results = execute_command(cmd);
-            output(executed_results);
+            output(executed_results, redirection);
         }
         
     }
@@ -137,11 +148,12 @@ mod test {
     use super::*;
     #[test]
     fn test() {
+        let txts = vec!["echo hi", ">", "test.txt"];
+        let x = txts.split(|s| { s == &">"});
+        for i in x{
+            println!("{:?}", i);
+        }
 
-        let op = Command::new("ls")
-        .arg("-1 > test.txt")
-        .output().expect("failed to execute process");
-        println!("{}", String::from_utf8_lossy(&op.stderr));
-        assert_eq!(1, 2);
+        assert_eq!(1, 1);
     }
 }

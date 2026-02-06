@@ -46,7 +46,6 @@ fn parse_command(command: String) -> COMMAND{
 
 
 
-
     match start {
         "exit" => return COMMAND::EXIT,
         "echo" => {

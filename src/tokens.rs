@@ -21,6 +21,7 @@ pub enum COMMAND{
 pub enum REDIRECTION{
     STDOUT(String),
     STDERR(String),
+    NONE
     // STDOUTappend(String),
     // STDERRappend(String),
 }

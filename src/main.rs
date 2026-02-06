@@ -35,16 +35,21 @@ fn split_args(command: String) -> Vec<String>{
     args.unwrap()
 
 }
-fn split_redirection(args: Vec<String>) -> (Vec<String>, String){
+fn split_redirection(args: Vec<String>) -> (Vec<String>, REDIRECTION){
 
     let splitted = args.split(|s| {
-        s == ">" || s == "1>"
+        s == ">" || s == "1>" 
     }).collect::<Vec<&[String]>>();
 
-    if splitted.len() == 1 {return (args, "".to_string())};
+    if splitted.len() == 1 {
+        let splitted = args.split(|s| {s == "2>" }).collect::<Vec<&[String]>>();
+        if splitted.len() == 1 {return (args, REDIRECTION::NONE)}
+
+        return (splitted[0].to_vec(), REDIRECTION::STDERR(splitted[1][0].to_string()))
+    };
 
 
-    (splitted[0].to_vec(), splitted[1][0].to_string())
+    (splitted[0].to_vec(), REDIRECTION::STDOUT(splitted[1][0].to_string()))
 }
 
 fn parse_command(command: String) -> Vec<(COMMAND, REDIRECTION)>{
@@ -58,7 +63,7 @@ fn parse_command(command: String) -> Vec<(COMMAND, REDIRECTION)>{
     commands.map(|cmd| {
 
         let (cmd, redirection) = split_redirection(cmd.to_vec());
-        (identify_command(cmd.to_vec()), REDIRECTION::STDOUT(redirection))
+        (identify_command(cmd.to_vec()), redirection)
     }).collect::<Vec<(COMMAND, REDIRECTION)>>()
 }
 

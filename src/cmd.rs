@@ -34,7 +34,13 @@ pub fn cmd_cat(args: Vec<String>)-> Vec<RESULT>{
         }
     }
 
-    response.push(RESULT::SUCCESS(Some(total)));
+    response.push(
+            if total.len() > 0 {
+                RESULT::SUCCESS(Some(total))
+            }else{
+                RESULT::SUCCESS(None)
+            }
+        );
 
     // println!("{:?}", response);
     response

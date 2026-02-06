@@ -1,2 +1,6 @@
 hi
 hi
+
+cat: nonex: No such file or directory
+
+cat: nx: No such file or directory

@@ -33,7 +33,7 @@ pub fn cmd_cat(args: Vec<String>)-> Vec<RESULT>{
             Err(_e) => response.push(RESULT::ERROR(format!("cat: {}: No such file or directory", path))),
         }
     }
-    
+
     response.push(RESULT::SUCCESS(Some(total)));
 
 
@@ -96,6 +96,7 @@ pub fn cmd_custom_command(program: String, args: Vec<String>)-> RESULT{
         .output()
         .expect("failed to execute process");
 
+    println!("{:?}", output);
     match output.status.code(){
         Some(code) => 
             if code == 0 {

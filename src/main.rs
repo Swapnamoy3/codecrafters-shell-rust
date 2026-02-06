@@ -7,7 +7,9 @@ use crate::tokens::*;
 mod cmd;
 use crate::cmd::*;
 
+use std::fs::exists;
 use std::io::{self, Write};
+use std::task::Context;
 use shlex;
 use std::{fs, path::Path};
 
@@ -118,37 +120,42 @@ fn execute_command(command: COMMAND) -> Vec<RESULT>{
     }
 }
 
-fn write_in_file(path: &String, content: String){
+fn write_in_file(path: &str, content: &str){
     let mut file = std::fs::File::create(&path).unwrap();
-    file.write_all(content.as_bytes()).unwrap();
+    file.write_all(content.trim().as_bytes()).unwrap();
     file.flush().unwrap();
 }
 
-fn append_in_file(path: &String, content: String){
-    if !std::fs::exists(Path::new(&path)).unwrap() {
-        std::fs::File::create(&path).unwrap();
+fn append_in_file(path: &str, content: &str) {
+    if !exists(path).unwrap(){
+        write_in_file(path, content.trim());
+        return;
     }
 
-    let mut file = std::fs::OpenOptions::new().append(true).open(&path).unwrap();
-    file.write_all(content.as_bytes()).unwrap();
-    file.flush().unwrap();
+
+    let mut prev_contents = fs::read(path).unwrap();
+    let content = format!("\n{}", content.trim()).as_bytes().to_vec();
+    
+    prev_contents.extend(content);
+
+    fs::write(path, prev_contents).unwrap();
 }
 
 fn output(results: Vec<RESULT>, redirection: REDIRECTION){
 
 
     match &redirection{
-        REDIRECTION::STDOUT(path) => write_in_file(&path, "".to_string()),
-        REDIRECTION::STDERR(path) => write_in_file(&path, "".to_string()),
+        REDIRECTION::STDOUT(path) => write_in_file(&path, ""),
+        REDIRECTION::STDERR(path) => write_in_file(&path, ""),
         _ => {}
     }
 
     for r in results{
         match (&r, &redirection){
-            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT(path)) => write_in_file(&path, msg.to_string()),
-            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT_APPEND(path)) => append_in_file(&path, msg.to_string()),
-            (RESULT::ERROR(msg), REDIRECTION::STDERR(path)) => write_in_file(&path, msg.to_string()),
-            (RESULT::ERROR(msg), REDIRECTION::STDERR_APPEND(path)) => append_in_file(&path, msg.to_string()),
+            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT(path)) => write_in_file(&path, msg),
+            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT_APPEND(path)) => append_in_file(&path, msg),
+            (RESULT::ERROR(msg), REDIRECTION::STDERR(path)) => write_in_file(&path, msg),
+            (RESULT::ERROR(msg), REDIRECTION::STDERR_APPEND(path)) => append_in_file(&path, msg),
             _ => {
                 match r{
                     RESULT::SUCCESS(Some(msg)) => println!("{}", msg),

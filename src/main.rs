@@ -62,7 +62,8 @@ fn parse_command(command: String) -> Vec<COMMAND>{
 }
 
 fn identify_command(args: Vec<String>) -> COMMAND{
-
+    if args.len() == 0 {return COMMAND::NONE("".to_string())}
+    
     let start = args[0].as_str();
 
 

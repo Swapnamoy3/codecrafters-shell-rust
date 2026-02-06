@@ -4,9 +4,11 @@ use crate::os_helpers::*;
 use crate::tokens::*;
 
 use std::fs;
+use std::io::Write;
 use std::path::Path;
 use std::process::Command;
 use std::env;
+
 
 
 
@@ -16,8 +18,26 @@ pub fn cmd_echo(args: Vec<String>)-> RESULT{
     return RESULT::SUCCESS(Some(msg));
 }
 
-pub fn cmd_cat(paths: Vec<String>)-> Vec<RESULT>{
 
+pub fn cmd_cat(args: Vec<String>)-> Vec<RESULT>{
+
+
+    let mut paths = vec![];
+    let mut redirection = false;
+    let mut redirection_path= "".to_string();
+    for arg in args{
+        if arg == ">" || arg == "1>" {
+            redirection = true;
+        }
+
+
+        if redirection {
+            redirection_path = arg;
+        }else {
+            paths.push(arg);
+        }
+    }
+    
     
     let mut response = Vec::new();
     let mut total = String::new(); 
@@ -29,7 +49,15 @@ pub fn cmd_cat(paths: Vec<String>)-> Vec<RESULT>{
         }
     }
 
-    response.push(RESULT::SUCCESS(Some(total)));
+
+    if redirection{
+        
+        let mut file = fs::File::create(&redirection_path).unwrap();
+        file.write_all(total.as_bytes()).unwrap();
+
+    }else{
+        response.push(RESULT::SUCCESS(Some(total)));
+    }
 
 
     response
@@ -74,17 +102,18 @@ pub fn cmd_pwd() -> RESULT{
 
 // impl of custom
 pub fn cmd_custom_command(program: String, args: Vec<String>)-> RESULT{
+
     let output = Command::new(program)
-        .args(args)
+        .arg(args.join(" "))
         .output()
         .expect("failed to execute process");
-
 
     match output.status.code(){
         Some(code) => 
             if code == 0 {
                 RESULT::SUCCESS(Some(format!("{}", String::from_utf8_lossy(&output.stdout).trim())))
             }else{
+
                 RESULT::ERROR(format!("{}", String::from_utf8_lossy(&output.stderr).trim()))
             }
         ,

@@ -114,15 +114,22 @@ fn output(results: Vec<RESULT>, redirection: REDIRECTION){
 
     for r in results{
         match (&r, &redirection){
-            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT(path)) => write_in_file(path, msg.to_string()),
-            (RESULT::ERROR(msg), REDIRECTION::STDERR(path)) => write_in_file(path, msg.to_string()),
+            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT(path)) => write_in_file(&path, msg.to_string()),
+            (RESULT::ERROR(msg), REDIRECTION::STDERR(path)) => write_in_file(&path, msg.to_string()),
             _ => {
                 match r{
                     RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
                     RESULT::ERROR(msg) => println!("{}", msg),
                     _ => {}
                 }
+
+                match &redirection {
+                    REDIRECTION::STDERR(path) => write_in_file(&path, "".to_string()),
+                    REDIRECTION::STDOUT(path) => write_in_file(&path, "".to_string()),
+                    _ => {}
+                }
             }
+            
         }
     }
 }

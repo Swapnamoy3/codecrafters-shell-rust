@@ -136,7 +136,12 @@ fn append_in_file(path: &str, content: &str) {
     let mut prev_contents = fs::read(path).unwrap();
     let content = format!("\n{}", content.trim()).as_bytes().to_vec();
     
-    prev_contents.pop();
+    let x = prev_contents.pop().unwrap();
+    
+        if x != b'\n' {
+            prev_contents.push(b'\n');
+        }
+    
     prev_contents.extend(content);
 
     fs::write(path, prev_contents).unwrap();

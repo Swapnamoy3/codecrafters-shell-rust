@@ -110,6 +110,8 @@ fn write_in_file(path: &String, content: String){
 }
 
 fn output(results: Vec<RESULT>, redirection: REDIRECTION){
+
+
     for r in results{
         match (r, &redirection){
             (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT(path)) => {
@@ -126,7 +128,9 @@ fn output(results: Vec<RESULT>, redirection: REDIRECTION){
                     write_in_file(path, msg);
                 }
             },
-            _ => {}
+            _ => {
+                println!("unexpected error");
+            }
         }
     }
 }

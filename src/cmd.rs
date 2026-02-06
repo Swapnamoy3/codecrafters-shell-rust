@@ -16,38 +16,53 @@ pub fn cmd_echo(args: Vec<String>)-> RESULT{
     return RESULT::SUCCESS(Some(msg));
 }
 
-pub fn cmd_cat(path: Vec<String>)-> RESULT{
+pub fn cmd_cat(paths: Vec<String>)-> Vec<RESULT>{
 
-    let content = path.iter().map(|pth|{
-        fs::read_to_string(pth).unwrap()
-    }).collect::<Vec<String>>().join("").trim().to_string();
+    
+    let mut response = Vec::new();
+    let mut total = String::new(); 
+    for path in paths{
+        let content = fs::read_to_string(&path);
+        match content {
+            Ok(content) => total.push_str(content.trim()),
+            Err(e) => response.push(RESULT::ERROR(e.to_string())),
+        }
+    }
 
-    return RESULT::SUCCESS(Some(content));
+    response.push(RESULT::SUCCESS(Some(total)));
+
+
+    response
+
 }
 
 // impl of type
-pub fn cmd_type(command: String) -> RESULT{  
-    for cmd in COMMANDS{
-        if cmd == command {
-            return RESULT::SUCCESS(Some(format!("{} is a shell builtin", command)));
-        }
-    }
-    
-
-    let paths = get_path();
-    for path in paths{
-        let desired_file_path = path.join(&command);
-        if fs::exists(&desired_file_path).unwrap() {
-            
-            if is_executable(&fs::metadata(&desired_file_path).unwrap()) {
-                return RESULT::SUCCESS(Some(format!("{} is {}", command, desired_file_path.display())));
+pub fn cmd_type(commands: Vec<String>) -> Vec<RESULT>{  
+    fn find(command: String) -> RESULT{
+        for cmd in COMMANDS{
+            if cmd == command {
+                return RESULT::SUCCESS(Some(format!("{} is a shell builtin", command)));
             }
         }
+        
+
+        let paths = get_path();
+        for path in paths{
+            let desired_file_path = path.join(&command);
+            if fs::exists(&desired_file_path).unwrap() {
+                
+                if is_executable(&fs::metadata(&desired_file_path).unwrap()) {
+                    return RESULT::SUCCESS(Some(format!("{} is {}", command, desired_file_path.display())));
+                }
+            }
+        }
+
+        
+        
+        return RESULT::ERROR(format!("{}: not found", command));
     }
 
-    
-    
-    return RESULT::ERROR(format!("{}: not found", command));
+    commands.iter().map(|cmd| find(cmd.to_string())).collect()
 }
 
 // impl of pwd
@@ -77,20 +92,27 @@ pub fn cmd_custom_command(program: String, args: Vec<String>)-> RESULT{
     }
 }
 
-pub fn cmd_cd(mut path: String) -> RESULT{
+pub fn cmd_cd(mut path: Vec<String>) -> RESULT{
 
-    
-    let home = env::var("HOME").unwrap();
-
-    if path == "~"{
-        path = home;
+    if path.len() > 1{
+        return RESULT::ERROR("cd: too many arguments".to_string());
+    }
+    if path.len() == 0 {
+        path = vec!["~".to_string()];
     }
 
-    if fs::exists(Path::new(&path)).unwrap() {
-        env::set_current_dir(&path).unwrap();
+
+    let home = env::var("HOME").unwrap();
+
+    if path[0] == "~"{
+        path[0] = home;
+    }
+
+    if fs::exists(Path::new(&path[0])).unwrap() {
+        env::set_current_dir(&path[0]).unwrap();
         return RESULT::SUCCESS(None);
     }
 
 
-    return RESULT::ERROR(format!("cd: {}: No such file or directory", path));
+    return RESULT::ERROR(format!("cd: {}: No such file or directory", path[0]));
 }

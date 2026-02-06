@@ -7,6 +7,7 @@ use crate::tokens::*;
 mod cmd;
 use crate::cmd::*;
 
+use std::f32::consts::E;
 use std::io::{self, Write};
 use shlex;
 
@@ -25,73 +26,32 @@ fn input_command() -> String{
 
 fn split_args(command: String) -> Vec<String>{  
 
+    
+    
+
     if command.len() == 0 {return vec![]}
 
     let args = shlex::split(&command);
 
-    match args{
-        None => {
-            return vec![]
-        },
-        Some(args)  => args
-    }
+    args.unwrap()
 
 }
 fn parse_command(command: String) -> COMMAND{
 
-    let start = command.split_whitespace().collect::<Vec<&str>>()[0];
-
-
-
-
+    let trimmed_command = command.trim();
+    let args = shlex::split(&trimmed_command).unwrap();
+    let start = args[0].as_str();
 
 
     match start {
         "exit" => return COMMAND::EXIT,
-        "echo" => {
-            let rest = if command.len() > 4 {command[4..].trim().to_string()} else {"".to_string()};
-            let words: Vec<String> = split_args(rest);
-            COMMAND::ECHO(words)
-        }
-        "type" => {
-            let rest = if command.len() > 4 {command[4..].trim().to_string()} else {"".to_string()};
-            return COMMAND::TYPE(rest);
-        },
-        "pwd" => return COMMAND::PWD,
-        "cd" => {
-            let rest = if command.len() > 2 {command[2..].trim().to_string()} else {"".to_string()};
-            
-            return COMMAND::CD(rest);
-        }, 
-        "cat" => {
-            let rest = if command.len() > 3 {command[3..].trim().to_string()} else {"".to_string()};
-            let words: Vec<String> = split_args(rest);
-            return COMMAND::CAT(words);
-        }
-
-        _ => {
-
-            let words: Vec<String> = split_args(command.clone());
-            if words.len() == 0 {return COMMAND::NONE(command);};
-        
-            let res = process_command(COMMAND::TYPE(words[0].to_string()));
-        
-            let program = words[0].to_string();
-            let args: Vec<String> = words.iter().skip(1).map(|s| s.to_string()).collect();
-            
-        
-            
-            let res = match res {
-                RESULT::SUCCESS(_mag) =>{
-                    COMMAND::CUSTOM(program, args)
-                },
-                _ => {
-                    COMMAND::NONE(command)
-                }
-            };
-
-            return res;
-        }
+        "echo" => COMMAND::ECHO(args[1..].to_vec()),
+        "type" => COMMAND::TYPE(args[1..].to_vec()),
+        "pwd" => COMMAND::PWD,
+        "cd" => COMMAND::CD(args[1..].to_vec()), 
+        "cat" => COMMAND::CAT(args[1..].to_vec()),
+        // custom commands
+        _ => COMMAND::CUSTOM(start.to_string(), args[1..].to_vec()),
     }
 
 }
@@ -100,15 +60,20 @@ fn parse_command(command: String) -> COMMAND{
 
 
 
-fn process_command(command: COMMAND) -> RESULT{
+fn process_command(command: COMMAND) -> Vec<RESULT>{
     match command{
-        COMMAND::ECHO(rest) => cmd_echo(rest),
+        COMMAND::ECHO(rest) => vec![cmd_echo(rest)],
         COMMAND::TYPE(rest) => cmd_type(rest),
-        COMMAND::EXIT => RESULT::SUCCESS(None),
-        COMMAND::NONE(command) => RESULT::ERROR(format!("{}: command not found", command)),
-        COMMAND::CUSTOM(program, args) => RESULT::RUN(program, args),
-        COMMAND::PWD => cmd_pwd(),
-        COMMAND::CD(path) => cmd_cd(path),
+        COMMAND::EXIT => vec![RESULT::SUCCESS(None)],
+        COMMAND::NONE(command) => vec![RESULT::ERROR(format!("{}: command not found", command))],
+        COMMAND::CUSTOM(program, args) => {
+            match cmd_type(vec![program.clone()])[0]{
+                RESULT::SUCCESS(Some(_)) => vec![RESULT::RUN(program, args)],
+                _ => vec![RESULT::ERROR(format!("{}: command not found", program))],
+            }
+        }
+        COMMAND::PWD => vec![cmd_pwd()],
+        COMMAND::CD(path) => vec![cmd_cd(path)],
         COMMAND::CAT(paths) => cmd_cat(paths)
     }
 }
@@ -131,19 +96,24 @@ fn main() {
         
         let res = process_command(command);
 
-        
-        let res = match res{
-            RESULT::RUN(program, args) => cmd_custom_command(program, args),
-            _ => {res}
-        };
-
 
         
+        let res = res.into_iter().map(move|r| {
+            match r{
+                RESULT::RUN(program, args) => cmd_custom_command(program, args),
+                _ => {r}
+            }
+        }); 
 
-        match res{
-            RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
-            RESULT::ERROR(msg) => println!("{}", msg),
-            _ => {}
+
+        
+        for r in res{
+
+            match r{
+                RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
+                RESULT::ERROR(msg) => println!("{}", msg),
+                _ => {}
+            }
         }
 
 

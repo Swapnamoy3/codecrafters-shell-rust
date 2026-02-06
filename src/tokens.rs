@@ -11,9 +11,9 @@ pub enum RESULT{
 pub enum COMMAND{
     EXIT, 
     ECHO(Vec<String>),
-    TYPE(String),
+    TYPE(Vec<String>),
     PWD,
-    CD(String),
+    CD(Vec<String>),
     CUSTOM(String, Vec<String>),
     NONE(String), 
     CAT(Vec<String>)

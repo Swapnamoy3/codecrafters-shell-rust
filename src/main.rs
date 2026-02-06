@@ -147,6 +147,8 @@ fn output(results: Vec<RESULT>, redirection: REDIRECTION){
     match &redirection{
         REDIRECTION::STDOUT(path) => write_in_file(&path, ""),
         REDIRECTION::STDERR(path) => write_in_file(&path, ""),
+        REDIRECTION::STDOUT_APPEND(path) => append_in_file(&path, ""),
+        REDIRECTION::STDERR_APPEND(path) => append_in_file(&path, ""),
         _ => {}
     }
 

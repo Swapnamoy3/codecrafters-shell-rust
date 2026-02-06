@@ -38,18 +38,18 @@ fn split_args(command: String) -> Vec<String>{
 fn split_redirection(args: Vec<String>) -> (Vec<String>, REDIRECTION){
 
     let splitted = args.split(|s| {
-        s == ">" || s == "1>" 
+        s == "2>" 
     }).collect::<Vec<&[String]>>();
 
     if splitted.len() == 1 {
-        let splitted = args.split(|s| {s == "2>" }).collect::<Vec<&[String]>>();
+        let splitted = args.split(|s| {s == ">" || s == "1>"}).collect::<Vec<&[String]>>();
         if splitted.len() == 1 {return (args, REDIRECTION::NONE)}
 
-        return (splitted[0].to_vec(), REDIRECTION::STDERR(splitted[1][0].to_string()))
+        return (splitted[0].to_vec(), REDIRECTION::STDOUT(splitted[1][0].to_string()))
     };
 
 
-    (splitted[0].to_vec(), REDIRECTION::STDOUT(splitted[1][0].to_string()))
+    (splitted[0].to_vec(), REDIRECTION::STDERR(splitted[1][0].to_string()))
 }
 
 fn parse_command(command: String) -> Vec<(COMMAND, REDIRECTION)>{

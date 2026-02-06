@@ -96,7 +96,7 @@ pub fn cmd_custom_command(program: String, args: Vec<String>)-> RESULT{
         .output()
         .expect("failed to execute process");
 
-    println!("{:?}", output.status.code());
+    // println!("{:?}", output.status.code());
     match output.status.code(){
         Some(code) => 
             if code == 0 {

@@ -37,19 +37,33 @@ fn split_args(command: String) -> Vec<String>{
 }
 fn split_redirection(args: Vec<String>) -> (Vec<String>, REDIRECTION){
 
+    let splitted = args.split(|s| {s == "2>>"}).collect::<Vec<&[String]>>();
+    if splitted.len() != 1 {
+        return  (splitted[0].to_vec(), REDIRECTION::STDERR_APPEND(splitted[1][0].to_string()));
+    }
+
+    let splitted = args.split(|s| {s == ">>" || s == "1>>"}).collect::<Vec<&[String]>>();
+    if splitted.len() != 1 {
+        return (splitted[0].to_vec(), REDIRECTION::STDOUT_APPEND(splitted[1][0].to_string()));
+    }
+
+
     let splitted = args.split(|s| {
         s == "2>" 
     }).collect::<Vec<&[String]>>();
 
-    if splitted.len() == 1 {
-        let splitted = args.split(|s| {s == ">" || s == "1>"}).collect::<Vec<&[String]>>();
-        if splitted.len() == 1 {return (args, REDIRECTION::NONE)}
-
-        return (splitted[0].to_vec(), REDIRECTION::STDOUT(splitted[1][0].to_string()))
-    };
+    if splitted.len() != 1 {
+        return  (splitted[0].to_vec(), REDIRECTION::STDERR(splitted[1][0].to_string()));
+    }
 
 
-    (splitted[0].to_vec(), REDIRECTION::STDERR(splitted[1][0].to_string()))
+
+    let splitted = args.split(|s| {s == ">" || s == "1>"}).collect::<Vec<&[String]>>();
+    if splitted.len() != 1 {
+        return (splitted[0].to_vec(), REDIRECTION::STDOUT(splitted[1][0].to_string()));
+    }
+
+    return (args, REDIRECTION::NONE)
 }
 
 fn parse_command(command: String) -> Vec<(COMMAND, REDIRECTION)>{
@@ -110,6 +124,14 @@ fn write_in_file(path: &String, content: String){
     file.flush().unwrap();
 }
 
+fn append_in_file(path: &String, content: String){
+    std::fs::File::create(&path).unwrap();
+
+    let mut file = std::fs::OpenOptions::new().append(true).open(&path).unwrap();
+    file.write_all(content.as_bytes()).unwrap();
+    file.flush().unwrap();
+}
+
 fn output(results: Vec<RESULT>, redirection: REDIRECTION){
 
 
@@ -122,7 +144,9 @@ fn output(results: Vec<RESULT>, redirection: REDIRECTION){
     for r in results{
         match (&r, &redirection){
             (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT(path)) => write_in_file(&path, msg.to_string()),
+            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT_APPEND(path)) => append_in_file(&path, msg.to_string()),
             (RESULT::ERROR(msg), REDIRECTION::STDERR(path)) => write_in_file(&path, msg.to_string()),
+            (RESULT::ERROR(msg), REDIRECTION::STDERR_APPEND(path)) => append_in_file(&path, msg.to_string()),
             _ => {
                 match r{
                     RESULT::SUCCESS(Some(msg)) => println!("{}", msg),

@@ -47,7 +47,7 @@ fn split_redirection(args: Vec<String>) -> (Vec<String>, String){
     (splitted[0].to_vec(), splitted[1][0].to_string())
 }
 
-fn parse_command(command: String) -> Vec<(COMMAND, String)>{
+fn parse_command(command: String) -> Vec<(COMMAND, REDIRECTION)>{
     let trimmed_command = command.trim();
     let args = shlex::split(&trimmed_command).unwrap();
     
@@ -58,8 +58,8 @@ fn parse_command(command: String) -> Vec<(COMMAND, String)>{
     commands.map(|cmd| {
 
         let (cmd, redirection) = split_redirection(cmd.to_vec());
-        (identify_command(cmd.to_vec()), redirection)
-    }).collect::<Vec<(COMMAND, String)>>()
+        (identify_command(cmd.to_vec()), REDIRECTION::STDOUT(redirection))
+    }).collect::<Vec<(COMMAND, REDIRECTION)>>()
 }
 
 
@@ -99,20 +99,28 @@ fn execute_command(command: COMMAND) -> Vec<RESULT>{
     }
 }
 
+fn write_in_file(path: &String, content: String){
+    let mut file = std::fs::File::create(&path).unwrap();
+    file.write_all(content.as_bytes()).unwrap();
+}
 
-
-fn output(results: Vec<RESULT>, redirection: String){
+fn output(results: Vec<RESULT>, redirection: REDIRECTION){
     for r in results{
-        match r{
-            RESULT::SUCCESS(Some(msg)) => {
-                if redirection.len() == 0{
+        match (r, &redirection){
+            (RESULT::SUCCESS(Some(msg)), REDIRECTION::STDOUT(path)) => {
+                if path.len() == 0{
                     println!("{}", msg);
                 }else{
-                    let mut file = std::fs::File::create(&redirection).unwrap();
-                    file.write_all(msg.as_bytes()).unwrap();
+                    write_in_file(path, msg);
                 }
             },
-            RESULT::ERROR(msg) => println!("{}", msg),
+            (RESULT::ERROR(msg), REDIRECTION::STDERR(path)) => {
+                if path.len() == 0 {
+                    println!("{}", msg);
+                }else {
+                    write_in_file(path, msg);
+                }
+            },
             _ => {}
         }
     }

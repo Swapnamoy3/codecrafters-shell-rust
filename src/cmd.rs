@@ -33,11 +33,7 @@ pub fn cmd_cat(args: Vec<String>)-> Vec<RESULT>{
             Err(_e) => response.push(RESULT::ERROR(format!("cat: {}: No such file or directory", path))),
         }
     }
-
-
-        
-
-
+    
     response.push(RESULT::SUCCESS(Some(total)));
 
 

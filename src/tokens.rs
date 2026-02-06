@@ -17,3 +17,10 @@ pub enum COMMAND{
     NONE(String), 
     CAT(Vec<String>), 
 }
+
+pub enum REDIRECTION{
+    STDOUT(String),
+    STDERR(String),
+    // STDOUTappend(String),
+    // STDERRappend(String),
+}

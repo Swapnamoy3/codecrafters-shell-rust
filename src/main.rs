@@ -9,7 +9,7 @@ use crate::cmd::*;
 
 use std::io::{self, Write};
 use shlex;
-
+use std::{fs, path::Path};
 
 
 fn input_command() -> String{
@@ -125,7 +125,9 @@ fn write_in_file(path: &String, content: String){
 }
 
 fn append_in_file(path: &String, content: String){
-    std::fs::File::create(&path).unwrap();
+    if !std::fs::exists(Path::new(&path)).unwrap() {
+        std::fs::File::create(&path).unwrap();
+    }
 
     let mut file = std::fs::OpenOptions::new().append(true).open(&path).unwrap();
     file.write_all(content.as_bytes()).unwrap();

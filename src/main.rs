@@ -113,7 +113,7 @@ fn output(results: Vec<RESULT>){
         match r{
             RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
             RESULT::ERROR(msg) => println!("{}", msg),
-            _ => {println!("dsa");}
+            _ => {}
         }
     }
 }

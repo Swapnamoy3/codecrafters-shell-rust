@@ -7,8 +7,8 @@ use crate::tokens::*;
 mod cmd;
 use crate::cmd::*;
 
-use std::f32::consts::E;
 use std::io::{self, Write};
+use std::result;
 use shlex;
 
 
@@ -36,10 +36,33 @@ fn split_args(command: String) -> Vec<String>{
     args.unwrap()
 
 }
-fn parse_command(command: String) -> COMMAND{
 
+fn parse_command(command: String) -> Vec<COMMAND>{
     let trimmed_command = command.trim();
     let args = shlex::split(&trimmed_command).unwrap();
+    
+
+    let mut commands = vec![];
+    let mut arg_vec = vec![];
+    for arg in args {
+        if arg == "|" {
+            commands.push(arg_vec);
+            arg_vec = vec![];
+        }else{
+            arg_vec.push(arg);
+        }
+    }
+    commands.push(arg_vec);
+
+    commands.iter().map(|cmd| {
+        identify_command(cmd.to_vec())
+    }).collect::<Vec<COMMAND>>()
+
+
+}
+
+fn identify_command(args: Vec<String>) -> COMMAND{
+
     let start = args[0].as_str();
 
 
@@ -78,6 +101,23 @@ fn process_command(command: COMMAND) -> Vec<RESULT>{
     }
 }
 
+fn execute_command(exe: RESULT) -> RESULT{
+    match exe{
+        RESULT::RUN(program, args) => cmd_custom_command(program, args),
+        _ => {exe}
+    }
+}
+
+fn output(results: Vec<RESULT>){
+    for r in results{
+        match r{
+            RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
+            RESULT::ERROR(msg) => println!("{}", msg),
+            _ => {println!("dsa");}
+        }
+    }
+}
+
 
 fn main() {
     // TODO: Uncomment the code below to pass the first stage
@@ -88,33 +128,26 @@ fn main() {
 
         let command = input_command();
 
-        let command = parse_command(command);
+        let commands = parse_command(command);
 
-        if command == COMMAND::EXIT {
-            break;
+        for cmd in commands{
+            if cmd == COMMAND::EXIT {return;}
+            let intermediate_results = process_command(cmd);
+
+
+
+            let executed_results = intermediate_results.into_iter().map(move|r| {
+                execute_command(r)
+            }).collect();
+
+
+
+            output(executed_results);
         }
         
-        let res = process_command(command);
 
 
         
-        let res = res.into_iter().map(move|r| {
-            match r{
-                RESULT::RUN(program, args) => cmd_custom_command(program, args),
-                _ => {r}
-            }
-        }); 
-
-
-        
-        for r in res{
-
-            match r{
-                RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
-                RESULT::ERROR(msg) => println!("{}", msg),
-                _ => {}
-            }
-        }
 
 
     }
@@ -124,3 +157,14 @@ fn main() {
 }
 
 
+mod test {
+    use super::*;
+    #[test]
+    fn test() {
+
+        let args = split_args("ls 1> file.txt".to_string());
+        println!("{:?}", args);
+
+        assert_eq!(1, 1);
+    }
+}

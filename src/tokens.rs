@@ -7,7 +7,7 @@ pub enum RESULT{
     SUCCESS(Option<String>)
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum COMMAND{
     EXIT, 
     ECHO(Vec<String>),
@@ -16,5 +16,5 @@ pub enum COMMAND{
     CD(Vec<String>),
     CUSTOM(String, Vec<String>),
     NONE(String), 
-    CAT(Vec<String>)
+    CAT(Vec<String>), 
 }

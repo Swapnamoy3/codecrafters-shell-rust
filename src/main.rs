@@ -137,8 +137,11 @@ fn append_in_file(path: &str, content: &str) {
     let content = format!("\n{}", content.trim()).as_bytes().to_vec();
     
     let x = prev_contents.pop();
-    if x != Some(b'\n') {
-        prev_contents.push(b'\n');
+    match x {
+        None =>{},
+        Some(ch) =>{
+            if ch != b'\n' {prev_contents.push(b'\n')},
+        } 
     }
 
     prev_contents.extend(content);

@@ -65,32 +65,32 @@ pub fn cmd_cat(args: Vec<String>)-> Vec<RESULT>{
 }
 
 // impl of type
-pub fn cmd_type(commands: Vec<String>) -> Vec<RESULT>{  
-    fn find(command: String) -> RESULT{
-        for cmd in COMMANDS{
-            if cmd == command {
-                return RESULT::SUCCESS(Some(format!("{} is a shell builtin", command)));
+pub fn find_cmd(command: String) -> RESULT{
+    for cmd in COMMANDS{
+        if cmd == command {
+            return RESULT::SUCCESS(Some(format!("{} is a shell builtin", command)));
+        }
+    }
+    
+
+    let paths = get_path();
+    for path in paths{
+        let desired_file_path = path.join(&command);
+        if fs::exists(&desired_file_path).unwrap() {
+            
+            if is_executable(&fs::metadata(&desired_file_path).unwrap()) {
+                return RESULT::SUCCESS(Some(format!("{} is {}", command, desired_file_path.display())));
             }
         }
-        
-
-        let paths = get_path();
-        for path in paths{
-            let desired_file_path = path.join(&command);
-            if fs::exists(&desired_file_path).unwrap() {
-                
-                if is_executable(&fs::metadata(&desired_file_path).unwrap()) {
-                    return RESULT::SUCCESS(Some(format!("{} is {}", command, desired_file_path.display())));
-                }
-            }
-        }
-
-        
-        
-        return RESULT::ERROR(format!("{}: not found", command));
     }
 
-    commands.iter().map(|cmd| find(cmd.to_string())).collect()
+    
+    
+    return RESULT::ERROR(format!("{}: not found", command));
+}
+pub fn cmd_type(commands: Vec<String>) -> Vec<RESULT>{  
+
+    commands.iter().map(|cmd| find_cmd(cmd.to_string())).collect()
 }
 
 // impl of pwd
@@ -102,6 +102,17 @@ pub fn cmd_pwd() -> RESULT{
 
 // impl of custom
 pub fn cmd_custom_command(program: String, args: Vec<String>)-> RESULT{
+
+
+    let valid_command = match find_cmd(program.clone()){
+        RESULT::SUCCESS(_) => true,
+        RESULT::ERROR(_msg) => false,
+    };
+
+    if !valid_command {
+        return RESULT::ERROR(format!("{}: command not found", program));
+    }
+
 
     let output = Command::new(program)
         .args(args)

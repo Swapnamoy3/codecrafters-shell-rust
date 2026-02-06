@@ -3,7 +3,6 @@ pub static COMMANDS: [&str; 5] = ["exit", "echo", "exit", "type", "pwd"];
 #[derive(PartialEq)]
 pub enum RESULT{
     ERROR(String),
-    RUN(String, Vec<String>),
     SUCCESS(Option<String>)
 }
 
@@ -14,7 +13,7 @@ pub enum COMMAND{
     TYPE(Vec<String>),
     PWD,
     CD(Vec<String>),
-    CUSTOM(String, Vec<String>),
+    EXEC(String, Vec<String>),
     NONE(String), 
     CAT(Vec<String>), 
 }

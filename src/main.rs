@@ -74,7 +74,7 @@ fn identify_command(args: Vec<String>) -> COMMAND{
         "cd" => COMMAND::CD(args[1..].to_vec()), 
         "cat" => COMMAND::CAT(args[1..].to_vec()),
         // custom commands
-        _ => COMMAND::CUSTOM(start.to_string(), args[1..].to_vec()),
+        _ => COMMAND::EXEC(start.to_string(), args[1..].to_vec()),
     }
 
 }
@@ -82,31 +82,20 @@ fn identify_command(args: Vec<String>) -> COMMAND{
 
 
 
-
-fn process_command(command: COMMAND) -> Vec<RESULT>{
+fn execute_command(command: COMMAND) -> Vec<RESULT>{
     match command{
         COMMAND::ECHO(rest) => vec![cmd_echo(rest)],
         COMMAND::TYPE(rest) => cmd_type(rest),
         COMMAND::EXIT => vec![RESULT::SUCCESS(None)],
         COMMAND::NONE(command) => vec![RESULT::ERROR(format!("{}: command not found", command))],
-        COMMAND::CUSTOM(program, args) => {
-            match cmd_type(vec![program.clone()])[0]{
-                RESULT::SUCCESS(Some(_)) => vec![RESULT::RUN(program, args)],
-                _ => vec![RESULT::ERROR(format!("{}: command not found", program))],
-            }
-        }
+        COMMAND::EXEC(program, args) => vec![cmd_custom_command(program, args)],
         COMMAND::PWD => vec![cmd_pwd()],
         COMMAND::CD(path) => vec![cmd_cd(path)],
         COMMAND::CAT(paths) => cmd_cat(paths)
     }
 }
 
-fn execute_command(exe: RESULT) -> RESULT{
-    match exe{
-        RESULT::RUN(program, args) => cmd_custom_command(program, args),
-        _ => {exe}
-    }
-}
+
 
 fn output(results: Vec<RESULT>){
     for r in results{
@@ -132,24 +121,10 @@ fn main() {
 
         for cmd in commands{
             if cmd == COMMAND::EXIT {return;}
-            let intermediate_results = process_command(cmd);
-
-
-
-            let executed_results = intermediate_results.into_iter().map(move|r| {
-                execute_command(r)
-            }).collect();
-
-
-
+            let executed_results = execute_command(cmd);
             output(executed_results);
         }
         
-
-
-        
-
-
     }
 
 

@@ -111,7 +111,6 @@ fn write_in_file(path: &String, content: String){
 }
 
 fn output(results: Vec<RESULT>, redirection: REDIRECTION){
-    println!("{:?}, {:?}", results, redirection);
 
 
     match &redirection{

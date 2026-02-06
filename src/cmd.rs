@@ -22,42 +22,23 @@ pub fn cmd_echo(args: Vec<String>)-> RESULT{
 pub fn cmd_cat(args: Vec<String>)-> Vec<RESULT>{
 
 
-    let mut paths = vec![];
-    let mut redirection = false;
-    let mut redirection_path= "".to_string();
-    for arg in args{
-        if arg == ">" || arg == "1>" {
-            redirection = true;
-        }
 
-
-        if redirection {
-            redirection_path = arg;
-        }else {
-            paths.push(arg);
-        }
-    }
-    
     
     let mut response = Vec::new();
     let mut total = String::new(); 
-    for path in paths{
+    for path in args{
         let content = fs::read_to_string(&path);
         match content {
             Ok(content) => total.push_str(content.trim()),
-            Err(e) => response.push(RESULT::ERROR(e.to_string())),
+            Err(_e) => response.push(RESULT::ERROR(format!("cat: {}: No such file or directory", path))),
         }
     }
 
 
-    if redirection{
         
-        let mut file = fs::File::create(&redirection_path).unwrap();
-        file.write_all(total.as_bytes()).unwrap();
 
-    }else{
-        response.push(RESULT::SUCCESS(Some(total)));
-    }
+
+    response.push(RESULT::SUCCESS(Some(total)));
 
 
     response

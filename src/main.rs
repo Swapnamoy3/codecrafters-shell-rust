@@ -140,7 +140,7 @@ fn append_in_file(path: &str, content: &str) {
     match x {
         None =>{},
         Some(ch) =>{
-            if ch != b'\n' {prev_contents.push(b'\n')},
+            if ch != b'\n' {prev_contents.push(b'\n')}
         } 
     }
 

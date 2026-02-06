@@ -36,7 +36,7 @@ pub fn cmd_cat(args: Vec<String>)-> Vec<RESULT>{
 
     response.push(RESULT::SUCCESS(Some(total)));
 
-
+    // println!("{:?}", response);
     response
 
 }

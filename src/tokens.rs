@@ -1,6 +1,6 @@
 pub static COMMANDS: [&str; 5] = ["exit", "echo", "exit", "type", "pwd"];
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Debug)]
 pub enum RESULT{
     ERROR(String),
     SUCCESS(Option<String>)
@@ -18,6 +18,7 @@ pub enum COMMAND{
     CAT(Vec<String>), 
 }
 
+#[derive(PartialEq, Debug)]
 pub enum REDIRECTION{
     STDOUT(String),
     STDERR(String),

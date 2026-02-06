@@ -107,10 +107,18 @@ fn execute_command(command: COMMAND) -> Vec<RESULT>{
 fn write_in_file(path: &String, content: String){
     let mut file = std::fs::File::create(&path).unwrap();
     file.write_all(content.as_bytes()).unwrap();
+    file.flush().unwrap();
 }
 
 fn output(results: Vec<RESULT>, redirection: REDIRECTION){
+    println!("{:?}, {:?}", results, redirection);
 
+
+    match &redirection{
+        REDIRECTION::STDOUT(path) => write_in_file(&path, "".to_string()),
+        REDIRECTION::STDERR(path) => write_in_file(&path, "".to_string()),
+        _ => {}
+    }
 
     for r in results{
         match (&r, &redirection){
@@ -120,12 +128,6 @@ fn output(results: Vec<RESULT>, redirection: REDIRECTION){
                 match r{
                     RESULT::SUCCESS(Some(msg)) => println!("{}", msg),
                     RESULT::ERROR(msg) => println!("{}", msg),
-                    _ => {}
-                }
-
-                match &redirection {
-                    REDIRECTION::STDERR(path) => write_in_file(&path, "".to_string()),
-                    REDIRECTION::STDOUT(path) => write_in_file(&path, "".to_string()),
                     _ => {}
                 }
             }

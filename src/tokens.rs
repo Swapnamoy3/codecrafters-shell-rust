@@ -25,6 +25,4 @@ pub enum REDIRECTION{
     STDOUT_APPEND(String),
     STDERR_APPEND(String),
     NONE
-    // STDOUTappend(String),
-    // STDERRappend(String),
 }

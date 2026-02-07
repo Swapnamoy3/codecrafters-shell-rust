@@ -9,9 +9,8 @@ use crate::cmd::*;
 
 use std::fs::exists;
 use std::io::{self, Write};
-use std::task::Context;
 use shlex;
-use std::{fs, path::Path};
+use std::{fs};
 
 
 fn input_command() -> String{
@@ -26,17 +25,9 @@ fn input_command() -> String{
 
 
 fn split_args(command: String) -> Vec<String>{  
-
-    
-    
-
-    if command.len() == 0 {return vec![]}
-
-    let args = shlex::split(&command);
-
-    args.unwrap()
-
+    todo!();
 }
+
 fn split_redirection(args: Vec<String>) -> (Vec<String>, REDIRECTION){
 
     let splitted = args.split(|s| {s == "2>>"}).collect::<Vec<&[String]>>();
@@ -204,8 +195,6 @@ fn main() {
 
 
 mod test {
-    use std::process::Command;
-    use super::*;
     #[test]
     fn test() {
         let txts = vec!["echo hi", ">", "test.txt"];

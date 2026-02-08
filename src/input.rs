@@ -48,6 +48,13 @@ impl Matcher{
         None
     }
 
+    fn get_all_matches(&self) -> Vec<String> {
+        
+        self.words.clone().into_iter().filter(|s| {
+            s.starts_with(&self.pat)
+        }).collect()
+    }
+
 }
 
 fn write_char_in_stdout(ch: char) {
@@ -90,8 +97,37 @@ pub fn input(keywords: Vec<String>) -> Result<String, io::Error> {
 
                 match key.code {
                     KeyCode::Tab | KeyCode::BackTab => {
+                        if matcher.pat_set { 
+                            write_str_in_stdout("\r\n");
+                            for word in matcher.get_all_matches(){
+                                write_str_in_stdout(format!("{}  ", word).as_ref());
+                            }
+                            write_str_in_stdout("\r\n");
+
+                            while !input_buff.is_empty() {
+                                let ch = input_buff.pop().unwrap();
+                                if ch != ' '{
+                                    input_buff.push(ch);
+                                    break;
+                                }
+                            }
+
+                            while !ongoing_word.is_empty() {
+                                input_buff.pop();
+                                ongoing_word.pop();
+                                write_backspace();
+                            }
+                            for ch in matcher.pat.chars(){
+                                ongoing_word.push(ch);
+                                input_buff.push(ch);
+                                write_char_in_stdout(ch);
+                            }
+                            continue;
+                        }
+
                         matcher.set_pat(&ongoing_word);
                         let matching_word = matcher.next();
+
 
                         if matching_word.is_none() { 
                             write_char_in_stdout('\x07');
@@ -107,7 +143,6 @@ pub fn input(keywords: Vec<String>) -> Result<String, io::Error> {
 
                             write_backspace();
                         }
-
 
                         while !ongoing_word.is_empty() {
                             input_buff.pop();

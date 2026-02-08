@@ -65,9 +65,9 @@ fn write_backspace(){
     stdout().flush().unwrap();
 }
 
-pub fn input() -> Result<String, io::Error> {
+pub fn input(keywords: Vec<String>) -> Result<String, io::Error> {
 
-    let mut matcher = Matcher::new(vec!["echo".to_string(), "exit".to_string(), "cd".to_string(), "type".to_string()]);
+    let mut matcher = Matcher::new(keywords);
     let mut input_buff = String::new();
     let mut ongoing_word = String::new();
 

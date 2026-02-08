@@ -3,12 +3,14 @@ mod os_helpers;
 mod tokens;
 
 use crate::tokens::*;
+use os_helpers::*;
 
 mod cmd;
 use crate::cmd::*;
 
 mod input;
 use crate::input::*;
+
 
 use std::fs::exists;
 use std::io::{self, Write};
@@ -172,14 +174,33 @@ fn output(results: Vec<RESULT>, redirection: REDIRECTION){
 }
 
 
+fn get_all_keywords() -> Vec<String>{
+    let mut keywords = vec!["echo".to_string(), "exit".to_string(), "cd".to_string(), "type".to_string()];
+
+    let paths = get_path();
+    for path in paths{
+        if !path.is_dir() {continue;}
+
+        let programs = fs::read_dir(&path).unwrap();
+        for program in programs{
+            keywords.push(program.unwrap().file_name().to_str().unwrap().to_string());
+        }
+    }
+
+
+    keywords
+}
+
 fn main() {
     // TODO: Uncomment the code below to pass the first stage
+
+
 
     loop{
         print!("$ ");
         io::stdout().flush().unwrap();
 
-        let command = input().unwrap();
+        let command = input(get_all_keywords()).unwrap();
 
         let commands = parse_command(command);
 

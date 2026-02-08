@@ -7,11 +7,13 @@ use crate::tokens::*;
 mod cmd;
 use crate::cmd::*;
 
+mod input;
+use crate::input::*;
+
 use std::fs::exists;
 use std::io::{self, Write};
 use shlex;
 use std::{fs};
-
 
 fn input_command() -> String{
     let mut buffer = String::new();
@@ -177,7 +179,7 @@ fn main() {
         print!("$ ");
         io::stdout().flush().unwrap();
 
-        let command = input_command();
+        let command = input().unwrap();
 
         let commands = parse_command(command);
 

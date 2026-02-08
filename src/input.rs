@@ -94,6 +94,7 @@ pub fn input() -> Result<String, io::Error> {
                         let matching_word = matcher.next();
 
                         if matching_word.is_none() { 
+                            write_char_in_stdout('\x07');
                             continue;
                         }
 

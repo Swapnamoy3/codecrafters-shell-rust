@@ -172,7 +172,7 @@ fn get_all_keywords() -> Vec<String>{
                                     "xyz_owl_dog".to_string(),
                                     "xyz_owl_dog_cow".to_string(),
                                     "xyz_owl_dog_cow".to_string()];
-    keywords.extend(extras);
+    // keywords.extend(extras);
 
     let paths = get_path();
     for path in paths{

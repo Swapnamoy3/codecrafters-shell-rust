@@ -74,12 +74,25 @@ impl Input{
         self.matcher.set_pat(&self.ongoing_word);
         let matching = self.matcher.get_match();
         let matchings = self.matcher.get_all_matches();
+        let prefix = longest_prefix(&matchings);
+
+        if(prefix.len() > self.ongoing_word.len()) {
+
+            while !self.ongoing_word.is_empty() {self.press_backspace();}
+            for ch in prefix.chars(){
+                self.press_char(ch);
+            }
+            self.press_space();
+            return;
+        }
+
+
+
         if matchings.len() > 1{
             ring_bell();
             return;
         }
         if let Some(matching) = matching{
-            // todo!();//replace the ongoing word with the matching word
             while !self.ongoing_word.is_empty() {self.press_backspace();}
             for ch in matching.chars(){
                 self.press_char(ch);

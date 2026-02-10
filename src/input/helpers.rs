@@ -28,3 +28,21 @@ pub fn ring_bell(){
 pub fn update_stdout(){
     stdout().flush().unwrap();
 }
+
+use std::collections::BTreeSet;
+
+fn prefix(a: &String, b: &String) -> String {
+    let mut i = 0;
+    while i < a.len() && i < b.len() && a.as_bytes()[i] == b.as_bytes()[i] {
+        i += 1;
+    }
+    a[..i].to_string()
+}
+pub fn longest_prefix(words: &BTreeSet<String>) -> String {
+    let mut longest = words.first().unwrap().clone();
+
+    for word in words.iter() {
+        longest = prefix(&longest, word)
+    }
+    longest
+}

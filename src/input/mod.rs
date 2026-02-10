@@ -76,7 +76,7 @@ impl Input{
         let matchings = self.matcher.get_all_matches();
         let prefix = longest_prefix(&matchings);
 
-        if prefix.len() > self.ongoing_word.len()  {
+        if prefix.len() > self.ongoing_word.len() && self.matcher.get_all_matches().len() > 1 {
 
             while !self.ongoing_word.is_empty() {self.press_backspace();}
             for ch in prefix.chars(){

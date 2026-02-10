@@ -39,7 +39,12 @@ fn prefix(a: &String, b: &String) -> String {
     a[..i].to_string()
 }
 pub fn longest_prefix(words: &BTreeSet<String>) -> String {
-    let mut longest = words.first().unwrap().clone();
+    let longest = words.first();
+    if longest.is_none() {
+        return "".to_string();
+    }
+
+    let mut longest = longest.unwrap().to_string();
 
     for word in words.iter() {
         longest = prefix(&longest, word)

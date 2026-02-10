@@ -163,6 +163,16 @@ fn output(results: Vec<RESULT>, redirection: REDIRECTION){
 
 fn get_all_keywords() -> Vec<String>{
     let mut keywords = vec!["echo".to_string(), "exit".to_string(), "cd".to_string(), "type".to_string()];
+    let extras = vec!["xyz_owl".to_string(),
+                                    "xyz_owl_dog".to_string(),
+                                    "xyz_owl_dog_cow".to_string(),
+                                    "xyz_owl".to_string(),
+                                    "xyz_owl_dog".to_string(),
+                                    "xyz_owl_dog_cow".to_string(),
+                                    "xyz_owl_dog".to_string(),
+                                    "xyz_owl_dog_cow".to_string(),
+                                    "xyz_owl_dog_cow".to_string()];
+    keywords.extend(extras);
 
     let paths = get_path();
     for path in paths{
@@ -216,3 +226,15 @@ mod test {
         assert_eq!(1, 1);
     }
 }
+
+/*
+["xyz_owl".to_string(),
+ "xyz_owl_dog".to_string(),
+ "xyz_owl_dog_cow".to_string(),
+ "xyz_owl".to_string(),
+ "xyz_owl_dog".to_string(),
+ "xyz_owl_dog_cow".to_string(),
+ "xyz_owl_dog".to_string(),
+ "xyz_owl_dog_cow".to_string(),
+ "xyz_owl_dog_cow".to_string()]
+ */

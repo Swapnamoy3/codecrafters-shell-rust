@@ -151,9 +151,9 @@ pub fn input(keywords: Vec<String>) -> Result<String, io::Error> {
             KeyCode::Tab | KeyCode::BackTab => {input.press_tab();},
 
             KeyCode::Enter => {input.press_enter(); break;},
-            KeyCode::Char(' ') =>{input.unset_tab_once(); input.press_space();},
-            KeyCode::Char(ch) => {input.unset_tab_once(); input.press_char(ch);},
-            KeyCode::Backspace => {input.unset_tab_once(); input.press_backspace();},
+            KeyCode::Char(' ') =>{input.unset_tab_once(); input.matcher.reset_pat(); input.press_space();},
+            KeyCode::Char(ch) => {input.unset_tab_once(); input.matcher.reset_pat(); input.press_char(ch);},
+            KeyCode::Backspace => {input.unset_tab_once(); input.matcher.reset_pat(); input.press_backspace();},
             _ => {}
         }
 

@@ -82,7 +82,6 @@ impl Input{
             for ch in prefix.chars(){
                 self.press_char(ch);
             }
-            self.press_space();
             return;
         }
 

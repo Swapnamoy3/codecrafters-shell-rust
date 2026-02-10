@@ -17,20 +17,7 @@ use std::io::{self, Write};
 use shlex;
 use std::{fs};
 
-fn input_command() -> String{
-    let mut buffer = String::new();
-    io::stdin().read_line(&mut buffer).unwrap();
-    let buffer = buffer.trim();
 
-    buffer.to_string()
-}
-
-
-
-
-fn split_args(command: String) -> Vec<String>{  
-    todo!();
-}
 
 fn split_redirection(args: Vec<String>) -> (Vec<String>, REDIRECTION){
 
